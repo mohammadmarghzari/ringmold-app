@@ -1,0 +1,42 @@
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+  font-family: -apple-system, "Vazirmatn", Tahoma, sans-serif;
+  background: #0b0e14;
+  color: #eef1f5;
+    direction: rtl;
+}
+.container { max-width: 720px; margin: 0 auto; padding: 16px; }
+.card {
+    background: #131722;
+  border: 1px solid #232838;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+.btn {
+    background: #c9a24b;
+      color: #0b0e14;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+}
+.btn.secondary { background: #232838; color: #eef1f5; }
+input, select {
+    width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #2a3040;
+  background: #0f131c;
+  color: #eef1f5;
+    margin-top: 6px;
+               }
+table { width: 100%; border-collapse: collapse; }
+td, th { padding: 8px; border-bottom: 1px solid #232838; text-align: right; }
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; }
+.badge.new { background: #2a3557; color: #8fb3ff; }
+.badge.measured { background: #3a3320; color: #e0c060; }
+.badge.done { background: #1f3a2a; color: #6fe0a0; }
