@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
   import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
 import { auth, googleProvider, ADMIN_EMAILS } from "../lib/firebase";
+import { ensureUserProfile } from "../lib/walletHelpers";
 
 const AuthContext = createContext(null);
 
@@ -12,6 +13,7 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, (u) => {
       setUser(u);
       setLoading(false);
+      if (u) ensureUserProfile(u);
 });
     return unsub;
 }, []);

@@ -1,8 +1,12 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { generateTechDrawing } from "../../lib/pdfGenerator";
+import { exportRingSTL } from "../../lib/ringMold";
+
+const RingViewer = dynamic(() => import("../../components/RingViewer"), { ssr: false });
 const MATERIAL_GUIDE = {
     plain: {
           title: "انگشتر ساده",
@@ -46,6 +50,16 @@ export default function Result() {
           pdf.save(`ring-mold-${order.id}.pdf`);
         };
 
+    const downloadSTL = () => {
+          const blob = exportRingSTL(order.measurements || {}, order.ringType);
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `ring-mold-${order.id}.stl`;
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+
     return (
           <div className="container">
             <h2 style={{ marginTop: 20 }}>نتیجه نهایی</h2>
@@ -59,6 +73,17 @@ export default function Result() {
                                 ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="card">
+              <b>مدل سه‌بعدی قالب</b>
+              <p style={{ fontSize: 13, color: "#9aa4b8", marginBottom: 10 }}>
+                این مدل از روی اندازه‌های ثبت‌شده ساخته شده. با موس/انگشت می‌تونی بچرخونیش. فایل STL رو می‌تونی مستقیم به قالب‌ساز یا پرینتر سه‌بعدی بدی تا مدل مستر رو براش بسازه.
+              </p>
+              {order.measurements && <RingViewer measurements={order.measurements} ringType={order.ringType} />}
+              <button className="btn" style={{ width: "100%", marginTop: 10 }} onClick={downloadSTL}>
+                دانلود فایل STL (برای قالب‌ساز/پرینتر سه‌بعدی)
+              </button>
             </div>
 
             <div className="card">
