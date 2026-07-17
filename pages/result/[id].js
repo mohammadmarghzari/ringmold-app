@@ -5,6 +5,9 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { generateTechDrawing } from "../../lib/pdfGenerator";
 import { exportRingSTL } from "../../lib/ringMold";
+import { useAuth } from "../../context/AuthContext";
+import { subscribeWallet } from "../../lib/walletHelpers";
+import Layout from "../../components/Layout";
 
 const RingViewer = dynamic(() => import("../../components/RingViewer"), { ssr: false });
 const MATERIAL_GUIDE = {
@@ -43,13 +46,20 @@ const FIELD_LABELS = {
 export default function Result() {
     const router = useRouter();
     const { id } = router.query;
+    const { user } = useAuth();
     const [order, setOrder] = useState(null);
     const [exporting, setExporting] = useState(false);
+    const [wallet, setWallet] = useState({ walletBalance: 0 });
 
     useEffect(() => {
           if (!id) return;
           getDoc(doc(db, "orders", id)).then(snap => setOrder({ id: snap.id, ...snap.data() }));
         }, [id]);
+
+    useEffect(() => {
+          if (!user) return;
+          return subscribeWallet(user.uid, setWallet);
+        }, [user]);
 
     if (!order) return null;
     const guide = MATERIAL_GUIDE[order.ringType] || MATERIAL_GUIDE.plain;
@@ -73,7 +83,7 @@ export default function Result() {
         };
 
     return (
-          <div className="container">
+          <Layout wallet={wallet.walletBalance || 0}>
             <h2 style={{ marginTop: 20 }}>نتیجه نهایی</h2>
 
             <div className="card">
@@ -126,6 +136,6 @@ export default function Result() {
             <p style={{ fontSize: 12, color: "#8a93a8", marginTop: 8 }}>
               این PDF رو با مقیاس 100% چاپ کن، بعد بده به قالب ساز.
             </p>
-          </div>
+          </Layout>
         );
   }

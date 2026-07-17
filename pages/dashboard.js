@@ -3,12 +3,13 @@ import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/router";
 import { createOrder, subscribeUserOrders } from "../lib/firestoreHelpers";
 import { subscribeWallet } from "../lib/walletHelpers";
+import Layout from "../components/Layout";
 
 const statusLabel = { new: "جدید", designed: "طرح ثبت شد", done: "آماده تحویل" };
 const statusClass = { new: "new", designed: "measured", done: "done" };
 
 export default function Dashboard() {
-    const { user, loading, logout } = useAuth();
+    const { user, loading } = useAuth();
     const router = useRouter();
     const [orders, setOrders] = useState([]);
     const [wallet, setWallet] = useState({ walletBalance: 0 });
@@ -35,14 +36,18 @@ export default function Dashboard() {
     if (!user) return null;
 
     return (
-          <div className="container">
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
-              <h2>سفارش‌های من</h2>
-              <button className="btn secondary" onClick={logout}>خروج</button>
-            </div>
-            <div className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer" }} onClick={() => router.push("/wallet")}>
-              <span>کیف پول: <b style={{ color: "#c9a24b" }}>{(wallet.walletBalance || 0).toLocaleString("fa-IR")} تومان</b></span>
-              <span style={{ color: "#9aa4b8", fontSize: 13 }}>مدیریت →</span>
+      <Layout wallet={wallet.walletBalance || 0}>
+            <h2 style={{ marginTop: 20 }}>سفارش‌های من</h2>
+
+            <div className="feature-grid">
+              <div className="feature-card" onClick={handleNewOrder}>
+                <span className="icon">💍</span>
+                <span>سفارش جدید</span>
+              </div>
+              <div className="feature-card" onClick={() => router.push("/wallet")}>
+                <span className="icon">💳</span>
+                <span>کیف پول</span>
+              </div>
             </div>
 
             {orders.length === 0 && (
@@ -57,9 +62,6 @@ export default function Dashboard() {
               </div>
             )}
 
-            <button className="btn" style={{ width: "100%", margin: "10px 0 20px" }} onClick={handleNewOrder}>
-              + سفارش جدید (طراحی انگشتر)
-            </button>
       {orders.map(o => (
                 <div className="card" key={o.id} onClick={() => router.push(
                             o.status === "new" ? `/new-order/${o.id}` : `/result/${o.id}`
@@ -71,6 +73,6 @@ export default function Dashboard() {
                 </div>
               ))}
       {orders.length === 0 && <p style={{ color: "#8a93a8" }}>هنوز سفارشی ثبت نکردی.</p>}
-          </div>
+      </Layout>
         );
 }

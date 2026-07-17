@@ -6,9 +6,10 @@ import {
   subscribeSettings, updateRatePerMinute,
   subscribeAllChargeRequests, approveCharge, rejectCharge,
 } from "../../lib/walletHelpers";
+import Layout from "../../components/Layout";
 
 export default function Admin() {
-  const { user, isAdmin, loading, logout } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
     const router = useRouter();
       const [orders, setOrders] = useState([]);
       const [settings, setSettings] = useState({ ratePerMinute: 500 });
@@ -46,11 +47,8 @@ export default function Admin() {
                                     if (!isAdmin) return null;
 
                                       return (
-                                          <div className="container">
-                                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 20 }}>
-                                                        <h2>پنل مدیریت</h2>
-                                                                <button className="btn secondary" onClick={logout}>خروج</button>
-                                                                      </div>
+                                          <Layout>
+                                                <h2 style={{ marginTop: 20 }}>پنل مدیریت</h2>
 
                                                 <div className="card">
                                                     <b>تنظیمات نرخ استفاده</b>
@@ -96,7 +94,7 @@ export default function Admin() {
                                                                                                                                                                                                               </button>
                                                                                                                                                                                                                       </div>
                                                                                                                                                                                                                             ))}
-                                                                                                                                                                                                                                </div>
+                                                                                                                                                                                                                                </Layout>
                                                                                                                                                                                                                                   );
                                                                                                                                                                                                                                   }
                                                                                                                                                                                                                                   
