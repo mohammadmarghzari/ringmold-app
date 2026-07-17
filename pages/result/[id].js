@@ -31,11 +31,20 @@ const MATERIAL_GUIDE = {
                 ],
         },
   };
+const FIELD_LABELS = {
+  innerDiameter: "قطر داخلی (سایز انگشت)",
+  bandWidth: "عرض بند",
+  bandThickness: "ضخامت فلز بند",
+  topWidth: "عرض روکار",
+  topHeight: "ارتفاع روکار",
+  stoneSize: "اندازه‌ی نگین",
+};
 
 export default function Result() {
     const router = useRouter();
     const { id } = router.query;
     const [order, setOrder] = useState(null);
+    const [exporting, setExporting] = useState(false);
 
     useEffect(() => {
           if (!id) return;
@@ -44,14 +53,17 @@ export default function Result() {
 
     if (!order) return null;
     const guide = MATERIAL_GUIDE[order.ringType] || MATERIAL_GUIDE.plain;
+    const design = order.design || {};
 
     const downloadPDF = () => {
           const pdf = generateTechDrawing(order);
           pdf.save(`ring-mold-${order.id}.pdf`);
         };
 
-    const downloadSTL = () => {
-          const blob = exportRingSTL(order.measurements || {}, order.ringType);
+    const downloadSTL = async () => {
+          setExporting(true);
+          const blob = await exportRingSTL(design);
+          setExporting(false);
           const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
@@ -65,24 +77,38 @@ export default function Result() {
             <h2 style={{ marginTop: 20 }}>نتیجه نهایی</h2>
 
             <div className="card">
-              <b>ابعاد نهایی</b>
+              <b>مشخصات طرح</b>
               <table style={{ marginTop: 10 }}>
                 <tbody>
-                  {Object.entries(order.measurements || {}).map(([k, v]) => (
-                                  <tr key={k}><td>{k}</td><td>{v} mm</td></tr>
+                  {Object.entries(FIELD_LABELS).map(([k, label]) => (
+                    design[k] ? <tr key={k}><td>{label}</td><td>{design[k]} mm</td></tr> : null
                                 ))}
                 </tbody>
               </table>
             </div>
 
+            {order.notes && (
+              <div className="card">
+                <b>توضیح طرح دلخواه (برای قالب‌ساز)</b>
+                <p style={{ fontSize: 14, marginTop: 8, whiteSpace: "pre-wrap" }}>{order.notes}</p>
+              </div>
+            )}
+
+            {order.refImage && (
+              <div className="card">
+                <b>عکس مرجع</b>
+                <img src={order.refImage} style={{ width: "100%", marginTop: 8, borderRadius: 8 }} />
+              </div>
+            )}
+
             <div className="card">
               <b>مدل سه‌بعدی قالب</b>
               <p style={{ fontSize: 13, color: "#9aa4b8", marginBottom: 10 }}>
-                این مدل از روی اندازه‌های ثبت‌شده ساخته شده. با موس/انگشت می‌تونی بچرخونیش. فایل STL رو می‌تونی مستقیم به قالب‌ساز یا پرینتر سه‌بعدی بدی تا مدل مستر رو براش بسازه.
+                این مدل از روی مشخصات ثبت‌شده ساخته شده. با موس/انگشت می‌تونی بچرخونیش. فایل STL رو می‌تونی مستقیم به قالب‌ساز یا پرینتر سه‌بعدی بدی تا مدل مستر رو براش بسازه.
               </p>
-              {order.measurements && <RingViewer measurements={order.measurements} ringType={order.ringType} />}
-              <button className="btn" style={{ width: "100%", marginTop: 10 }} onClick={downloadSTL}>
-                دانلود فایل STL (برای قالب‌ساز/پرینتر سه‌بعدی)
+              <RingViewer design={design} />
+              <button className="btn" style={{ width: "100%", marginTop: 10 }} disabled={exporting} onClick={downloadSTL}>
+                {exporting ? "در حال آماده‌سازی..." : "دانلود فایل STL (برای قالب‌ساز/پرینتر سه‌بعدی)"}
               </button>
             </div>
 

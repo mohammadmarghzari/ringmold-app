@@ -54,7 +54,7 @@ export default function Admin() {
 
                                                 <div className="card">
                                                     <b>تنظیمات نرخ استفاده</b>
-                                                    <p style={{ fontSize: 13, color: "#9aa4b8" }}>نرخ فعلی: {settings.ratePerMinute?.toLocaleString("fa-IR")} تومان به ازای هر دقیقه استفاده از ابزار اندازه‌گیری.</p>
+                                                    <p style={{ fontSize: 13, color: "#9aa4b8" }}>نرخ فعلی: {settings.ratePerMinute?.toLocaleString("fa-IR")} تومان به ازای هر دقیقه استفاده از ابزار طراحی.</p>
                                                     <input type="number" value={rateInput} onChange={(e) => setRateInput(e.target.value)} />
                                                     <button className="btn" style={{ marginTop: 10 }} onClick={saveRate}>ذخیره نرخ</button>
                                                 </div>
@@ -77,11 +77,19 @@ export default function Admin() {
                                                                                     <div className="card" key={o.id}>
                                                                                               <div>سفارش #{o.id.slice(0, 6)} - {o.userEmail}</div>
                                                                                                         <div style={{ fontSize: 13, color: "#9aa4b8" }}>وضعیت: {o.status} - نوع: {o.ringType}</div>
-                                                                                                                  <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
-                                                                                                                              {o.photos?.map((p, i) => (
-                                                                                                                                            <img key={i} src={p.url} style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 6 }} />
-                                                                                                                                                        ))}
-                                                                                                                                                                  </div>
+                                                                                                                  {o.design?.innerDiameter && (
+                                                                                                                    <div style={{ fontSize: 13, color: "#9aa4b8", marginTop: 4 }}>
+                                                                                                                      سایز: {o.design.innerDiameter}mm - عرض بند: {o.design.bandWidth}mm - روکار: {o.design.topShape}
+                                                                                                                    </div>
+                                                                                                                  )}
+                                                                                                                  {o.notes && (
+                                                                                                                    <div style={{ fontSize: 13, color: "#c9a24b", marginTop: 4, whiteSpace: "pre-wrap" }}>
+                                                                                                                      طرح دلخواه: {o.notes}
+                                                                                                                    </div>
+                                                                                                                  )}
+                                                                                                                  {o.refImage && (
+                                                                                                                    <img src={o.refImage} style={{ width: 80, height: 80, objectFit: "cover", borderRadius: 6, marginTop: 8 }} />
+                                                                                                                  )}
                                                                                                                                                                             <button className="btn secondary" style={{ marginTop: 8 }}
                                                                                                                                                                                         onClick={() => updateOrder(o.id, { status: "done" })}>
                                                                                                                                                                                                     علامت گذاری به عنوان آماده تحویل
