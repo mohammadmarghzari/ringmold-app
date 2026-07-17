@@ -2,7 +2,8 @@ import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { uploadReferenceImage, updateOrder } from "../../lib/firestoreHelpers";
-import { chargeForUsage, getRatePerMinute } from "../../lib/walletHelpers";
+import { chargeForUsage, getRatePerMinute, subscribeWallet } from "../../lib/walletHelpers";
+import Layout from "../../components/Layout";
 
 const TOP_SHAPES = [
   { value: "none", label: "بدون روکار (بند ساده)" },
@@ -32,11 +33,17 @@ export default function NewOrder() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [rate, setRate] = useState(500);
   const [saving, setSaving] = useState(false);
+  const [wallet, setWallet] = useState({ walletBalance: 0 });
   const startTimeRef = useRef(Date.now());
 
   useEffect(() => {
     getRatePerMinute().then(setRate);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    return subscribeWallet(user.uid, setWallet);
+  }, [user]);
 
   const handleRefImage = async (file) => {
     if (!file || !id) return;
@@ -87,7 +94,7 @@ export default function NewOrder() {
   if (!id || !user) return null;
 
   return (
-    <div className="container">
+    <Layout wallet={wallet.walletBalance || 0}>
       <h2 style={{ marginTop: 20 }}>طراحی انگشتر</h2>
 
       <div className="card">
@@ -174,6 +181,6 @@ export default function NewOrder() {
       <button className="btn" style={{ width: "100%" }} disabled={saving || uploadingImage} onClick={submit}>
         {saving ? "در حال ثبت..." : "ثبت طرح و ساخت مدل سه‌بعدی"}
       </button>
-    </div>
+    </Layout>
   );
 }

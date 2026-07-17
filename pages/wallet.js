@@ -5,9 +5,15 @@ import {
   subscribeWallet, subscribeUserChargeRequests, subscribeWalletTransactions,
   requestCharge, subscribeSettings,
 } from "../lib/walletHelpers";
+import Layout from "../components/Layout";
 
 const TX_LABEL = { charge: "شارژ کیف پول", usage: "هزینه استفاده از ابزار طراحی" };
 const REQ_STATUS_LABEL = { pending: "در انتظار تایید", approved: "تایید شد", rejected: "رد شد" };
+const PACKAGES = [
+  { amount: 100000, title: "شروع", desc: "برای امتحان کردن ابزار طراحی" },
+  { amount: 300000, title: "محبوب‌ترین", desc: "برای طراحی چندین انگشتر", popular: true },
+  { amount: 600000, title: "حرفه‌ای", desc: "برای استفاده‌ی زیاد یا سفارش‌های تکراری" },
+];
 
 export default function Wallet() {
   const { user, loading } = useAuth();
@@ -16,7 +22,7 @@ export default function Wallet() {
   const [requests, setRequests] = useState([]);
   const [txs, setTxs] = useState([]);
   const [settings, setSettings] = useState({ ratePerMinute: 500 });
-  const [amount, setAmount] = useState(100000);
+  const [customAmount, setCustomAmount] = useState("");
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
@@ -32,7 +38,7 @@ export default function Wallet() {
     return () => { u1(); u2(); u3(); u4(); };
   }, [user]);
 
-  const submitRequest = async () => {
+  const submitRequest = async (amount) => {
     if (!amount || amount <= 0) return;
     setSending(true);
     await requestCharge(user.uid, user.email, Number(amount));
@@ -43,7 +49,7 @@ export default function Wallet() {
   if (!user) return null;
 
   return (
-    <div className="container">
+    <Layout wallet={wallet.walletBalance || 0}>
       <h2 style={{ marginTop: 20 }}>کیف پول</h2>
 
       <div className="card">
@@ -56,11 +62,23 @@ export default function Wallet() {
         </p>
       </div>
 
+      <b style={{ display: "block", margin: "18px 0 8px" }}>بسته‌های شارژ</b>
+      {PACKAGES.map((p) => (
+        <div key={p.amount} className={`package-card ${p.popular ? "popular" : ""}`}>
+          {p.popular && <span className="package-popular-badge">محبوب‌ترین</span>}
+          <div style={{ fontSize: 22, color: "#c9a24b", fontWeight: 700 }}>{p.amount.toLocaleString("fa-IR")} تومان</div>
+          <div style={{ fontSize: 14, marginTop: 4 }}>{p.title}</div>
+          <p style={{ fontSize: 13, color: "#9aa4b8", marginTop: 4 }}>{p.desc}</p>
+          <button className="btn" style={{ width: "100%", marginTop: 10 }} disabled={sending} onClick={() => submitRequest(p.amount)}>
+            انتخاب
+          </button>
+        </div>
+      ))}
+
       <div className="card">
-        <b>شارژ کیف پول</b>
-        <p style={{ fontSize: 13, color: "#9aa4b8" }}>مبلغ رو وارد کن. درخواست ثبت می‌شه و بعد از تایید ادمین به موجودیت اضافه می‌شه.</p>
-        <input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} style={{ marginTop: 8 }} />
-        <button className="btn" style={{ width: "100%", marginTop: 10 }} disabled={sending} onClick={submitRequest}>
+        <b>مبلغ دلخواه</b>
+        <input type="number" value={customAmount} onChange={(e) => setCustomAmount(e.target.value)} placeholder="مبلغ به تومان" style={{ marginTop: 8 }} />
+        <button className="btn secondary" style={{ width: "100%", marginTop: 10 }} disabled={sending} onClick={() => submitRequest(customAmount)}>
           {sending ? "در حال ارسال..." : "ثبت درخواست شارژ"}
         </button>
       </div>
@@ -90,10 +108,6 @@ export default function Wallet() {
           </div>
         ))}
       </div>
-
-      <button className="btn secondary" style={{ width: "100%" }} onClick={() => router.push("/dashboard")}>
-        بازگشت به داشبورد
-      </button>
-    </div>
+    </Layout>
   );
 }
