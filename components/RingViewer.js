@@ -1,14 +1,15 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { buildRingGeometry } from "../lib/ringMold";
+import { buildRingParts, loadFont } from "../lib/ringMold";
 
-export default function RingViewer({ measurements, ringType, height = 300 }) {
+export default function RingViewer({ design, height = 300 }) {
   const mountRef = useRef(null);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
+    let cancelled = false;
 
     const width = mount.clientWidth;
     const scene = new THREE.Scene();
@@ -26,17 +27,21 @@ export default function RingViewer({ measurements, ringType, height = 300 }) {
     dir.position.set(10, 20, 10);
     scene.add(dir);
 
-    const geometries = buildRingGeometry(measurements, ringType);
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
     const group = new THREE.Group();
-    geometries.forEach((geo) => {
-      const mesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0xc9a24b, metalness: 0.4, roughness: 0.4 }));
-      group.add(mesh);
-    });
     group.rotation.x = -Math.PI / 2;
     scene.add(group);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
+    (design.engraveText ? loadFont() : Promise.resolve(null)).then((font) => {
+      if (cancelled) return;
+      const parts = buildRingParts(design, font);
+      parts.forEach(({ geometry, color }) => {
+        const mesh = new THREE.Mesh(geometry, new THREE.MeshStandardMaterial({ color, metalness: 0.4, roughness: 0.4 }));
+        group.add(mesh);
+      });
+    });
 
     let frameId;
     const animate = () => {
@@ -55,13 +60,14 @@ export default function RingViewer({ measurements, ringType, height = 300 }) {
     window.addEventListener("resize", handleResize);
 
     return () => {
+      cancelled = true;
       window.removeEventListener("resize", handleResize);
       cancelAnimationFrame(frameId);
       controls.dispose();
       renderer.dispose();
       mount.removeChild(renderer.domElement);
     };
-  }, [measurements, ringType, height]);
+  }, [design, height]);
 
   return <div ref={mountRef} style={{ width: "100%", height, borderRadius: 8, overflow: "hidden" }} />;
 }

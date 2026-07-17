@@ -6,7 +6,7 @@ import {
   requestCharge, subscribeSettings,
 } from "../lib/walletHelpers";
 
-const TX_LABEL = { charge: "شارژ کیف پول", usage: "هزینه استفاده از ابزار اندازه‌گیری" };
+const TX_LABEL = { charge: "شارژ کیف پول", usage: "هزینه استفاده از ابزار طراحی" };
 const REQ_STATUS_LABEL = { pending: "در انتظار تایید", approved: "تایید شد", rejected: "رد شد" };
 
 export default function Wallet() {
@@ -52,7 +52,7 @@ export default function Wallet() {
           {(wallet.walletBalance || 0).toLocaleString("fa-IR")} تومان
         </div>
         <p style={{ fontSize: 13, color: "#9aa4b8", marginTop: 6 }}>
-          نرخ فعلی استفاده از ابزار اندازه‌گیری: {settings.ratePerMinute?.toLocaleString("fa-IR")} تومان به ازای هر دقیقه.
+          نرخ فعلی استفاده از ابزار طراحی: {settings.ratePerMinute?.toLocaleString("fa-IR")} تومان به ازای هر دقیقه.
         </p>
       </div>
 

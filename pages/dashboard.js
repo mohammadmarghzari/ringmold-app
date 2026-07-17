@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import { createOrder, subscribeUserOrders } from "../lib/firestoreHelpers";
 import { subscribeWallet } from "../lib/walletHelpers";
 
-const statusLabel = { new: "جدید", photos_uploaded: "عکس‌ها آپلود شد", measured: "اندازه‌گیری شد", done: "آماده تحویل" };
-const statusClass = { new: "new", photos_uploaded: "new", measured: "measured", done: "done" };
+const statusLabel = { new: "جدید", designed: "طرح ثبت شد", done: "آماده تحویل" };
+const statusClass = { new: "new", designed: "measured", done: "done" };
 
 export default function Dashboard() {
     const { user, loading, logout } = useAuth();
@@ -49,22 +49,20 @@ export default function Dashboard() {
               <div className="card">
                 <b>مراحل کار چطوریه؟</b>
                 <ol style={{ fontSize: 14, color: "#9aa4b8", marginTop: 8, paddingRight: 18, lineHeight: 2 }}>
-                  <li>سفارش جدید بزن و از انگشتر، از ۴ زاویه، همراه یه مرجع اندازه (سکه یا خط‌کش) عکس بگیر.</li>
-                  <li>روی هر عکس، با لمس دو نقطه، اول مرجع اندازه رو کالیبره کن، بعد ابعاد مورد نیاز رو ثبت کن.</li>
+                  <li>سفارش جدید بزن و سایز انگشتت و مشخصات طرح (شکل روکار، نگین، حکاکی) رو وارد کن.</li>
+                  <li>هرچی طرح خاص‌تری می‌خوای، توی کادر توضیحات کامل بنویس — برای قالب‌ساز فرستاده می‌شه.</li>
                   <li>مدل سه‌بعدی قالب و نقشه‌ی فنی PDF ساخته می‌شه؛ فایل STL رو بده به قالب‌ساز.</li>
-                  <li>هزینه‌ی استفاده از ابزار اندازه‌گیری بر اساس مدت زمان کارت از کیف پولت کسر می‌شه — یادت نره قبلش شارژش کنی.</li>
+                  <li>هزینه‌ی استفاده از ابزار طراحی بر اساس مدت زمان کارت از کیف پولت کسر می‌شه — یادت نره قبلش شارژش کنی.</li>
                 </ol>
               </div>
             )}
 
             <button className="btn" style={{ width: "100%", margin: "10px 0 20px" }} onClick={handleNewOrder}>
-              + سفارش جدید (عکس‌های انگشتر)
+              + سفارش جدید (طراحی انگشتر)
             </button>
       {orders.map(o => (
                 <div className="card" key={o.id} onClick={() => router.push(
-                            o.status === "done" ? `/result/${o.id}` :
-                            o.status === "photos_uploaded" ? `/measure/${o.id}` :
-                            `/new-order/${o.id}`
+                            o.status === "new" ? `/new-order/${o.id}` : `/result/${o.id}`
                           )} style={{ cursor: "pointer" }}>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <span>سفارش #{o.id.slice(0, 6)}</span>
